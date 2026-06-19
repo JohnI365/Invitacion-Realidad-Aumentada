@@ -246,37 +246,6 @@ window.triggerWelcomeConfetti = function () {
 };
 
 // ════════════════════════════════════════════════════════════
-//  DEMO MODE DESDE LOADING SCREEN
-// ════════════════════════════════════════════════════════════
-
-// Muestra el botón de demo en la pantalla de carga si MindAR
-// tarda más de 18 segundos en inicializar.
-var loadingDemoTimer = setTimeout(function () {
-  var btn  = document.getElementById('demo-loading-btn');
-  var hint = document.getElementById('demo-loading-hint');
-  if (btn)  btn.style.display  = 'block';
-  if (hint) hint.style.display = 'block';
-}, 18000);
-
-window.activateDemoFromLoading = function () {
-  clearTimeout(loadingDemoTimer);
-
-  // Ocultar loading screen manualmente
-  var loadingEl = document.getElementById('ui-loading');
-  if (loadingEl) loadingEl.style.display = 'none';
-
-  // Ocultar demo button superior
-  var demoUI = document.getElementById('ui-demo');
-  if (demoUI) demoUI.style.display = 'none';
-
-  // Disparar la secuencia de etapas
-  var targetRoot = document.getElementById('target-root');
-  if (targetRoot) {
-    targetRoot.emit('targetFound');
-  }
-};
-
-// ════════════════════════════════════════════════════════════
 //  DOM WIRING
 // ════════════════════════════════════════════════════════════
 

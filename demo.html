@@ -5,47 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>FCV — Vista Demo</title>
+  <title>FCV — Invitación AR</title>
   <link rel="stylesheet" href="css/ui.css">
 
+  <!-- Preconexión para acelerar descarga de CDNs -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://aframe.io">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <link rel="dns-prefetch" href="https://aframe.io">
+
+  <!-- canvas-confetti primero (3KB) — disponible casi de inmediato -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-  <!-- Solo A-Frame, sin MindAR -->
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="js/components.js"></script>
-
-  <style>
-    /* Banner demo */
-    #demo-banner {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      padding: 10px 16px;
-      background: rgba(198, 40, 40, 0.92);
-      color: #fff;
-      font-size: 12px;
-      font-weight: 600;
-      text-align: center;
-      z-index: 50;
-      letter-spacing: 0.5px;
-    }
-
-    #demo-banner a {
-      color: #ffd700;
-      text-decoration: none;
-      font-weight: 800;
-    }
-  </style>
 </head>
 <body>
 
-  <!-- Banner informativo -->
-  <div id="demo-banner">
-    MODO DEMO — Vista previa sin cámara AR &nbsp;|&nbsp;
-    <a href="index.html">&#8592; Volver a la experiencia AR completa</a>
-  </div>
-
-  <!-- ── Overlays 2D (mismos que index.html, sin el de scanning) ── -->
+  <!-- ── Overlays 2D ── -->
 
   <!-- Mensaje de bienvenida con confetti -->
   <div id="ui-welcome">
@@ -232,13 +208,38 @@
 
   <script src="js/experience.js"></script>
   <script>
-    // Iniciar la experiencia automáticamente en demo mode
+    var FCV_COLORS = ['#c62828', '#ffd700', '#1a237e', '#ffffff'];
+
+    // ── Confetti y bienvenida INMEDIATOS ──────────────────
+    // Se ejecuta en cuanto el DOM está listo, sin esperar A-Frame.
+    // canvas-confetti (3KB) ya está cargado desde el <head>.
+    document.addEventListener('DOMContentLoaded', function () {
+      setTimeout(function () {
+        // Mostrar tarjeta de bienvenida
+        var welcomeEl = document.getElementById('ui-welcome');
+        if (welcomeEl) {
+          welcomeEl.classList.add('visible');
+          setTimeout(function () { welcomeEl.classList.remove('visible'); }, 4200);
+        }
+        // Confetti
+        if (typeof confetti !== 'undefined') {
+          confetti({ particleCount: 160, spread: 80, origin: { x: 0.5, y: 0.45 }, colors: FCV_COLORS, scalar: 1.1 });
+          setTimeout(function () {
+            confetti({ particleCount: 90, angle: 55,  spread: 60, origin: { x: 0, y: 0.65 }, colors: FCV_COLORS });
+            confetti({ particleCount: 90, angle: 125, spread: 60, origin: { x: 1, y: 0.65 }, colors: FCV_COLORS });
+          }, 350);
+          setTimeout(function () {
+            confetti({ particleCount: 60, spread: 100, origin: { x: 0.5, y: 0.3 }, colors: FCV_COLORS, gravity: 0.6, scalar: 0.8 });
+          }, 750);
+        }
+      }, 500);
+    });
+
+    // ── Escena 3D: inicia cuando A-Frame termina de cargar ──
     document.querySelector('a-scene').addEventListener('loaded', function () {
       var targetRoot = document.getElementById('target-root');
       if (targetRoot) {
-        setTimeout(function () {
-          targetRoot.emit('targetFound');
-        }, 800);
+        setTimeout(function () { targetRoot.emit('targetFound'); }, 200);
       }
     });
   </script>
