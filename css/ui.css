@@ -1,0 +1,528 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+/* ─── Overlay Base ─── */
+.ui-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── Loading Screen ─── */
+#ui-loading {
+  flex-direction: column;
+  gap: 20px;
+  background: #0a0a14;
+  pointer-events: all;
+  z-index: 60; /* tapa todo mientras MindAR inicializa */
+}
+
+.loading-logo {
+  font-size: 32px;
+  font-weight: 900;
+  color: #c62828;
+  letter-spacing: 6px;
+  text-align: center;
+  text-shadow: 0 0 24px rgba(198,40,40,0.6);
+}
+
+.loading-tagline {
+  font-size: 13px;
+  color: rgba(255,255,255,0.55);
+  text-align: center;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(198,40,40,0.2);
+  border-top-color: #c62828;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Scanning Overlay ─── */
+#ui-scanning {
+  flex-direction: column;
+  gap: 24px;
+}
+
+.scan-frame {
+  width: 260px;
+  height: 180px;
+  position: relative;
+}
+
+/* Corner brackets */
+.scan-frame::before,
+.scan-frame::after,
+.scan-frame > span::before,
+.scan-frame > span::after {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-color: #c62828;
+  border-style: solid;
+  border-radius: 2px;
+}
+
+.scan-frame::before  { top: 0; left: 0;  border-width: 3px 0 0 3px; }
+.scan-frame::after   { top: 0; right: 0; border-width: 3px 3px 0 0; }
+.scan-frame > span::before { bottom: 0; left: 0;  border-width: 0 0 3px 3px; }
+.scan-frame > span::after  { bottom: 0; right: 0; border-width: 0 3px 3px 0; }
+
+.scan-line {
+  position: absolute;
+  top: 0;
+  left: 5%;
+  width: 90%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #c62828, transparent);
+  box-shadow: 0 0 8px #c62828;
+  animation: scanLine 2s ease-in-out infinite;
+}
+
+@keyframes scanLine {
+  0%   { top: 0;    opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.scan-text {
+  color: rgba(255,255,255,0.9);
+  font-size: 14px;
+  text-align: center;
+  letter-spacing: 0.5px;
+  line-height: 1.6;
+  padding: 0 32px;
+}
+
+.scan-text strong {
+  color: #fff;
+}
+
+.scan-hint {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  text-align: center;
+}
+
+/* ─── Chapter Buttons Bar ─── */
+#ui-chapters {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 12px 16px 24px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 20;
+  transform: translateY(110%);
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
+}
+
+#ui-chapters.visible {
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+.chapter-btn {
+  flex: 1;
+  max-width: 110px;
+  padding: 12px 8px;
+  border: none;
+  border-radius: 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  color: #fff;
+  text-align: center;
+  line-height: 1.4;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.45);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.chapter-btn:active {
+  transform: scale(0.93);
+}
+
+.chapter-btn[data-chapter="0"] { background: rgba(198, 40, 40, 0.88); }
+.chapter-btn[data-chapter="1"] { background: rgba(27, 94, 32, 0.88); }
+.chapter-btn[data-chapter="2"] { background: rgba(230, 81, 0, 0.88); }
+
+.chapter-btn-icon {
+  display: block;
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+/* ─── Chapter Detail Panel ─── */
+#ui-chapter-detail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+#ui-chapter-detail.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.chapter-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.chapter-panel {
+  position: relative;
+  margin-top: auto;
+  max-height: 78vh;
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  overflow: hidden;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+#ui-chapter-detail.visible .chapter-panel {
+  transform: translateY(0);
+}
+
+.chapter-handle {
+  width: 36px;
+  height: 4px;
+  background: #ddd;
+  border-radius: 2px;
+  margin: 12px auto 0;
+  flex-shrink: 0;
+}
+
+.chapter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px 14px;
+  flex-shrink: 0;
+}
+
+.chapter-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #1a1a1a;
+}
+
+.chapter-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: #f0f0f0;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  pointer-events: all;
+  flex-shrink: 0;
+}
+
+.chapter-divider {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 0 20px;
+  flex-shrink: 0;
+}
+
+.chapter-body {
+  overflow-y: auto;
+  padding: 20px 20px 36px;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+}
+
+/* ─── Timeline (Capítulo 0 — Momentos Históricos) ─── */
+.timeline {
+  position: relative;
+  padding-left: 36px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: linear-gradient(to bottom, #c62828 80%, transparent);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 28px;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -29px;
+  top: 4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #c62828;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px #c62828;
+}
+
+.timeline-year {
+  font-size: 11px;
+  font-weight: 800;
+  color: #c62828;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.timeline-event {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 5px;
+  line-height: 1.3;
+}
+
+.timeline-desc {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.55;
+}
+
+/* ─── Values Grid (Capítulo 1 — Valores) ─── */
+.values-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.value-card {
+  background: #f7fdf7;
+  border-radius: 14px;
+  padding: 16px 12px;
+  border-left: 4px solid #1b5e20;
+}
+
+.value-icon {
+  font-size: 26px;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.value-name {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1b5e20;
+  margin-bottom: 5px;
+}
+
+.value-desc {
+  font-size: 11px;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* ─── Future (Capítulo 2 — Futuro) ─── */
+.future-item {
+  margin-bottom: 28px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.future-item:last-child {
+  border-bottom: none;
+  margin-bottom: 8px;
+}
+
+.future-num {
+  font-size: 40px;
+  font-weight: 900;
+  color: #e65100;
+  opacity: 0.12;
+  line-height: 1;
+  margin-bottom: -6px;
+}
+
+.future-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 10px;
+  line-height: 1.3;
+}
+
+.future-desc {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.65;
+}
+
+.cta-button {
+  display: block;
+  width: 100%;
+  margin-top: 28px;
+  padding: 15px;
+  background: linear-gradient(135deg, #e65100, #bf360c);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 6px 20px rgba(230,81,0,0.35);
+}
+
+/* ─── Welcome Overlay (confetti + mensaje) ─── */
+#ui-welcome {
+  position: fixed;
+  top: 38%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  z-index: 35;
+  pointer-events: none;
+  text-align: center;
+  width: 88%;
+  max-width: 340px;
+  transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#ui-welcome.visible {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.welcome-card {
+  background: rgba(10, 10, 20, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 22px;
+  padding: 26px 28px 22px;
+  border: 1.5px solid rgba(255, 215, 0, 0.35);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(198,40,40,0.15);
+}
+
+.welcome-emoji {
+  font-size: 40px;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.welcome-title {
+  font-size: 22px;
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.welcome-sub {
+  font-size: 14px;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.5;
+}
+
+.welcome-divider {
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(90deg, #c62828, #ffd700);
+  border-radius: 2px;
+  margin: 12px auto 12px;
+}
+
+.welcome-org {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffd700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ─── Demo Mode Button ─── */
+#ui-demo {
+  position: fixed;
+  top: env(safe-area-inset-top, 16px);
+  right: 16px;
+  z-index: 25;  /* debajo del loading screen */
+  pointer-events: all;
+}
+
+.demo-btn {
+  background: rgba(0,0,0,0.65);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.85);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}

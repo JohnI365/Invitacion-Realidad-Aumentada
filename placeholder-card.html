@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tarjeta Placeholder — FCV AR</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 16px;
+      gap: 24px;
+    }
+
+    .instructions {
+      background: #fff8e1;
+      border: 1px solid #f9a825;
+      border-radius: 10px;
+      padding: 16px 20px;
+      max-width: 680px;
+      width: 100%;
+      font-size: 13px;
+      color: #444;
+      line-height: 1.7;
+    }
+
+    .instructions h2 {
+      font-size: 15px;
+      color: #c62828;
+      margin-bottom: 10px;
+    }
+
+    .instructions ol {
+      padding-left: 20px;
+    }
+
+    .instructions a {
+      color: #1565c0;
+      font-weight: 600;
+    }
+
+    .instructions code {
+      background: #f0f0f0;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    /* ─── La tarjeta ─── */
+    #card-wrapper {
+      width: 680px;
+      height: 480px;
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.6);
+    }
+
+    canvas#card {
+      display: block;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-save  { background: #c62828; color: #fff; }
+    .btn-print { background: #1a237e; color: #fff; }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .instructions, .btn-row { display: none; }
+      #card-wrapper { box-shadow: none; border-radius: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="instructions">
+    <h2>&#9432; Instrucciones — Tarjeta de Prueba para AR</h2>
+    <p>Esta página genera una tarjeta de <strong>prueba temporal</strong> con suficiente riqueza visual para que MindAR pueda detectarla como target AR.</p>
+    <ol>
+      <li>Haz clic en <strong>"Guardar como JPG"</strong> para descargar la imagen <code>fcv-placeholder-card.jpg</code>.</li>
+      <li>Ve al compilador de MindAR: <a href="https://hiukim.github.io/mind-ar-js-doc/tools/compile/" target="_blank">hiukim.github.io/mind-ar-js-doc/tools/compile/</a></li>
+      <li>Sube el JPG descargado y haz clic en <strong>Start</strong>.</li>
+      <li>Descarga el archivo <code>targets.mind</code> generado.</li>
+      <li>Coloca <code>targets.mind</code> en la raíz del proyecto (<code>37. Proyecto Realidad Aumentada/</code>).</li>
+      <li>Cuando el arte final de la invitación esté listo, <strong>repite el proceso con esa imagen</strong> para reemplazar el placeholder.</li>
+    </ol>
+    <br>
+    <p><strong>Consejo:</strong> Para el arte final, el centro de la tarjeta debe tener imágenes o texturas ricas. Coloca el QR en una esquina.</p>
+  </div>
+
+  <div id="card-wrapper">
+    <canvas id="card" width="680" height="480"></canvas>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-save"  id="btn-save">&#8659; Guardar como JPG</button>
+    <button class="btn btn-print" id="btn-print">&#128438; Imprimir</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('card');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width;
+    const H = canvas.height;
+
+    function drawCard() {
+      // ─── Fondo gradiente oscuro azul/rojo ───────────────
+      const bg = ctx.createLinearGradient(0, 0, W, H);
+      bg.addColorStop(0,   '#0a0a2e');
+      bg.addColorStop(0.5, '#1a0010');
+      bg.addColorStop(1,   '#1a0000');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+
+      // ─── Patrón de cuadrícula (feature points para MindAR) ──
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= W; x += 40) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+      }
+      for (let y = 0; y <= H; y += 40) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      }
+
+      // ─── Círculos decorativos (textura visual) ───────────
+      function drawCircle(x, y, r, color, alpha) {
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.strokeStyle = color;
+        ctx.globalAlpha = alpha;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+
+      drawCircle(W/2, H/2, 180, '#c62828', 0.35);
+      drawCircle(W/2, H/2, 140, '#1a237e', 0.30);
+      drawCircle(W/2, H/2, 220, '#ffd700', 0.20);
+      drawCircle(W/2, H/2, 260, '#c62828', 0.12);
+
+      // ─── Estrellas / puntos aleatorios (feature points) ──
+      ctx.fillStyle = '#fff';
+      const points = [
+        [60,40],[120,80],[200,30],[320,60],[450,45],[560,90],[620,40],
+        [40,160],[180,140],[300,180],[420,150],[580,170],[650,130],
+        [80,240],[240,270],[380,250],[500,280],[640,260],
+        [50,350],[170,380],[310,340],[460,370],[590,360],[660,380],
+        [100,440],[260,460],[400,430],[540,450],[630,470],
+        [140,100],[340,120],[480,95],[620,110],
+        [200,200],[400,210],[580,195],
+        [130,300],[350,315],[530,295]
+      ];
+      points.forEach(function(p) {
+        ctx.beginPath();
+        ctx.arc(p[0], p[1], 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // ─── Logo FCV (centro) ────────────────────────────────
+      ctx.save();
+      ctx.font = 'bold 90px "Segoe UI", Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#c62828';
+      ctx.globalAlpha = 0.15;
+      ctx.fillText('FCV', W/2, H/2);
+      ctx.globalAlpha = 1;
+
+      // Borde rojo del logo
+      ctx.font = 'bold 72px "Segoe UI", Arial, sans-serif';
+      ctx.fillStyle = '#fff';
+      ctx.globalAlpha = 0.92;
+      ctx.fillText('FCV', W/2, H/2 - 8);
+      ctx.globalAlpha = 1;
+
+      ctx.font = '18px "Segoe UI", Arial, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.75)';
+      ctx.fillText('Fundación Cardiovascular de Colombia', W/2, H/2 + 50);
+      ctx.restore();
+
+      // ─── Línea de acento rojo horizontal ──────────────────
+      const line = ctx.createLinearGradient(0, 0, W, 0);
+      line.addColorStop(0,   'transparent');
+      line.addColorStop(0.3, '#c62828');
+      line.addColorStop(0.7, '#c62828');
+      line.addColorStop(1,   'transparent');
+      ctx.fillStyle = line;
+      ctx.fillRect(0, H/2 + 72, W, 3);
+
+      // ─── Texto evento (esquina superior izquierda) ────────
+      ctx.save();
+      ctx.font = 'bold 16px "Segoe UI", Arial, sans-serif';
+      ctx.fillStyle = '#ffd700';
+      ctx.textAlign = 'left';
+      ctx.fillText('EVENTO ANIVERSARIO 2025', 28, 36);
+      ctx.font = '13px "Segoe UI", Arial, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.fillText('Te invitamos a celebrar juntos', 28, 58);
+      ctx.restore();
+
+      // ─── Fecha (esquina inferior izquierda) ───────────────
+      ctx.save();
+      ctx.font = 'bold 22px "Segoe UI", Arial, sans-serif';
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'left';
+      ctx.fillText('Diciembre 2025', 28, H - 52);
+      ctx.font = '13px "Segoe UI", Arial, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      ctx.fillText('Escanea el QR para la experiencia AR', 28, H - 30);
+      ctx.restore();
+
+      // ─── Marcador QR (esquina inferior derecha) ───────────
+      ctx.save();
+      const qx = W - 110, qy = H - 110, qs = 85;
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 2;
+      // Marco del placeholder QR
+      ctx.strokeRect(qx, qy, qs, qs);
+      // Cruz interior (simula la zona del QR)
+      ctx.strokeStyle = 'rgba(255,215,0,0.3)';
+      ctx.lineWidth = 1;
+      for (let i = 1; i < 5; i++) {
+        const step = qs / 5;
+        ctx.beginPath(); ctx.moveTo(qx + i*step, qy); ctx.lineTo(qx + i*step, qy+qs); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(qx, qy + i*step); ctx.lineTo(qx+qs, qy + i*step); ctx.stroke();
+      }
+      ctx.font = 'bold 10px "Segoe UI", Arial, sans-serif';
+      ctx.fillStyle = 'rgba(255,215,0,0.7)';
+      ctx.textAlign = 'center';
+      ctx.fillText('QR aquí', qx + qs/2, qy + qs/2 - 5);
+      ctx.font = '9px "Segoe UI", Arial, sans-serif';
+      ctx.fillText('(usar qr-generator.html)', qx + qs/2, qy + qs/2 + 9);
+      ctx.restore();
+
+      // ─── Bordes de textura en las esquinas ───────────────
+      function cornerAccent(x, y, dx, dy) {
+        ctx.beginPath();
+        ctx.moveTo(x + dx * 40, y);
+        ctx.lineTo(x, y);
+        ctx.lineTo(x, y + dy * 40);
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth = 3;
+        ctx.globalAlpha = 0.6;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+      cornerAccent(8, 8, 1, 1);
+      cornerAccent(W-8, 8, -1, 1);
+      cornerAccent(8, H-8, 1, -1);
+      cornerAccent(W-8, H-8, -1, -1);
+    }
+
+    drawCard();
+
+    // ─── Descargar como JPG ───────────────────────────────
+    document.getElementById('btn-save').addEventListener('click', function () {
+      canvas.toBlob(function (blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'fcv-placeholder-card.jpg';
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 'image/jpeg', 0.92);
+    });
+
+    document.getElementById('btn-print').addEventListener('click', function () {
+      window.print();
+    });
+  </script>
+
+</body>
+</html>

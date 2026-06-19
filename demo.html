@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>FCV — Vista Demo</title>
+  <link rel="stylesheet" href="css/ui.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <!-- Solo A-Frame, sin MindAR -->
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <script src="js/components.js"></script>
+
+  <style>
+    /* Banner demo */
+    #demo-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 10px 16px;
+      background: rgba(198, 40, 40, 0.92);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      z-index: 50;
+      letter-spacing: 0.5px;
+    }
+
+    #demo-banner a {
+      color: #ffd700;
+      text-decoration: none;
+      font-weight: 800;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Banner informativo -->
+  <div id="demo-banner">
+    MODO DEMO — Vista previa sin cámara AR &nbsp;|&nbsp;
+    <a href="index.html">&#8592; Volver a la experiencia AR completa</a>
+  </div>
+
+  <!-- ── Overlays 2D (mismos que index.html, sin el de scanning) ── -->
+
+  <!-- Mensaje de bienvenida con confetti -->
+  <div id="ui-welcome">
+    <div class="welcome-card">
+      <div class="welcome-emoji">🎉</div>
+      <div class="welcome-title">¡Bienvenido/a!</div>
+      <div class="welcome-divider"></div>
+      <div class="welcome-sub">Estás a punto de explorar<br>la historia de nuestra institución</div>
+      <div class="welcome-org">Fundación Cardiovascular de Colombia</div>
+    </div>
+  </div>
+
+  <!-- Capítulos -->
+  <div id="ui-chapters">
+    <button class="chapter-btn" data-chapter="0">
+      <span class="chapter-btn-icon">🏛️</span>Momentos<br>Históricos
+    </button>
+    <button class="chapter-btn" data-chapter="1">
+      <span class="chapter-btn-icon">⭐</span>Nuestros<br>Valores
+    </button>
+    <button class="chapter-btn" data-chapter="2">
+      <span class="chapter-btn-icon">🚀</span>Nuestro<br>Futuro
+    </button>
+  </div>
+
+  <!-- Panel de detalle del capítulo -->
+  <div id="ui-chapter-detail">
+    <div class="chapter-backdrop"></div>
+    <div class="chapter-panel">
+      <div class="chapter-handle"></div>
+      <div class="chapter-header">
+        <div class="chapter-title" id="chapter-title"></div>
+        <button class="chapter-close" id="chapter-close">&#x2715;</button>
+      </div>
+      <div class="chapter-divider"></div>
+      <div class="chapter-body" id="chapter-body"></div>
+    </div>
+  </div>
+
+  <!-- ── Escena A-Frame sin MindAR ── -->
+  <a-scene
+    embedded
+    vr-mode-ui="enabled: false"
+    background="color: #1a1a2e"
+    renderer="colorManagement: true; antialias: true;"
+  >
+    <!-- Cámara con controles de órbita para navegar en desktop y mobile -->
+    <a-entity
+      id="camera-rig"
+      position="0 0.3 2.2"
+      look-controls="magicWindowTrackingEnabled: false"
+      wasd-controls="enabled: false">
+      <a-camera fov="60" near="0.01" far="100"></a-camera>
+    </a-entity>
+
+    <!-- Iluminación -->
+    <a-light type="ambient" intensity="0.5" color="#fff"></a-light>
+    <a-light type="directional" intensity="0.8" position="1 2 1" color="#fff"></a-light>
+
+    <!-- Suelo de referencia -->
+    <a-plane
+      rotation="-90 0 0"
+      width="4" height="4"
+      color="#0a0a1e"
+      opacity="0.6">
+    </a-plane>
+
+    <!-- ══ TARGET ROOT (mismo contenido que index.html) ══ -->
+    <a-entity id="target-root" stage-controller>
+
+      <!-- EDIFICIO -->
+      <a-entity id="building" visible="false" position="0 0 0">
+
+        <a-torus position="0 0.012 0" rotation="-90 0 0" radius="0.38" radius-tubular="0.009"
+          color="#ffd700" opacity="0.75" segments-tubular="40"
+          animation="property: rotation; to: -90 360 0; dur: 4000; loop: true; easing: linear">
+        </a-torus>
+        <a-torus position="0 0.012 0" rotation="-90 0 0" radius="0.46" radius-tubular="0.005"
+          color="#c62828" opacity="0.45" segments-tubular="40"
+          animation="property: rotation; to: -90 -360 0; dur: 6500; loop: true; easing: linear">
+        </a-torus>
+
+        <!-- Imagen real del edificio FCV -->
+        <a-image
+          src="assets/fcv.png"
+          position="0 0.72 0.01"
+          width="1.1"
+          height="1.44"
+          transparent="true"
+          opacity="1">
+        </a-image>
+
+        <!-- Resplandor en la base -->
+        <a-plane position="0 0.01 0" rotation="-90 0 0"
+          width="1.0" height="0.6" color="#ffd700" opacity="0.08">
+        </a-plane>
+
+        <a-entity position="0 0.72 0">
+          <a-box width="0.028" height="0.028" depth="0.028" position="0.58 0 0" color="#ffd700" opacity="0.85"
+            animation="property: position; from: 0.58 0 0; to: 0 0 0.58; dur: 3200; loop: true; dir: alternate; easing: easeInOutSine"></a-box>
+          <a-box width="0.022" height="0.022" depth="0.022" position="-0.52 0.1 0.28" color="#c62828" opacity="0.75"
+            animation="property: position; from: -0.52 0.1 0.28; to: 0.42 -0.1 -0.52; dur: 4100; loop: true; dir: alternate; easing: easeInOutSine"></a-box>
+          <a-box width="0.019" height="0.019" depth="0.019" position="0.22 0.28 -0.54" color="#90caf9" opacity="0.65"
+            animation="property: position; from: 0.22 0.28 -0.54; to: -0.48 -0.12 0.48; dur: 3700; loop: true; dir: alternate; easing: easeInOutSine"></a-box>
+        </a-entity>
+      </a-entity>
+
+      <!-- AVATAR -->
+      <a-entity id="avatar" visible="false" position="0.58 0 0"
+        animation="property: position; from: 0.58 0 0; to: 0.58 0.022 0; dur: 1600; loop: true; dir: alternate; easing: easeInOutSine">
+
+        <a-box position="-0.038 0.007 0.022" width="0.055" height="0.022" depth="0.075" color="#01579b"></a-box>
+        <a-box position=" 0.038 0.007 0.022" width="0.055" height="0.022" depth="0.075" color="#01579b"></a-box>
+        <a-cylinder position="-0.038 0.098 0" radius="0.024" height="0.19" color="#0277bd"></a-cylinder>
+        <a-cylinder position=" 0.038 0.098 0" radius="0.024" height="0.19" color="#0277bd"></a-cylinder>
+        <a-box position="0 0.26 0" width="0.17" height="0.21" depth="0.11" color="#0d47a1" metalness="0.18" roughness="0.55"></a-box>
+        <a-plane position="0 0.275 0.056" width="0.072" height="0.072" color="#c62828" opacity="0.95"></a-plane>
+        <a-text value="FCV" position="0 0.275 0.058" align="center" scale="0.052 0.052 0.052" color="#fff"></a-text>
+        <a-cylinder position="-0.13 0.25 0" radius="0.021" height="0.17" color="#0288d1" rotation="0 0 22"></a-cylinder>
+        <a-sphere position="-0.185 0.17 0" radius="0.027" color="#29b6f6"></a-sphere>
+        <a-cylinder position="0.13 0.25 0" radius="0.021" height="0.17" color="#0288d1" rotation="0 0 -22"></a-cylinder>
+        <a-sphere position="0.185 0.17 0" radius="0.027" color="#29b6f6"></a-sphere>
+        <a-cylinder position="0 0.375 0" radius="0.026" height="0.055" color="#0277bd"></a-cylinder>
+
+        <a-sphere position="0 0.455 0" radius="0.085" color="#29b6f6" metalness="0.38" roughness="0.3">
+          <a-sphere position="-0.034 0.012 0.076" radius="0.018" color="#0d47a1"></a-sphere>
+          <a-sphere position=" 0.034 0.012 0.076" radius="0.018" color="#0d47a1"></a-sphere>
+          <a-sphere position="-0.026 0.018 0.082" radius="0.007" color="#fff" opacity="0.9"></a-sphere>
+          <a-sphere position=" 0.042 0.018 0.082" radius="0.007" color="#fff" opacity="0.9"></a-sphere>
+          <a-cylinder position="0 0.105 0" radius="0.006" height="0.075" color="#0d47a1"></a-cylinder>
+          <a-sphere position="0 0.148 0" radius="0.014" color="#c62828"
+            animation="property: color; from: #c62828; to: #ffd700; dur: 900; dir: alternate; loop: true"></a-sphere>
+        </a-sphere>
+
+        <a-entity position="0 0.685 0">
+          <a-plane width="0.55" height="0.135" color="#fff" opacity="0.93"></a-plane>
+          <a-box position="-0.12 -0.086 0" width="0.04" height="0.04" depth="0.001"
+                 color="#fff" opacity="0.93" rotation="0 0 45"></a-box>
+          <a-text id="speech-text" value="¡Bienvenido/a a la FCV!"
+            align="center" position="0 0 0.003"
+            scale="0.105 0.105 0.105" color="#1a237e" width="5.2"></a-text>
+        </a-entity>
+      </a-entity>
+
+      <!-- ESFERAS DE CAPÍTULO -->
+      <a-entity id="chapter-orbs" visible="false">
+
+        <a-entity id="orb-0" class="clickable chapter-orb" data-chapter="0"
+          position="-0.48 0.22 0" visible="false" pulse-glow chapter-orb>
+          <a-sphere radius="0.095" color="#c62828" metalness="0.45" roughness="0.22" opacity="0.92"></a-sphere>
+          <a-torus radius="0.13" radius-tubular="0.008" rotation="-90 0 0" color="#ffd700" opacity="0.65"
+            animation="property: rotation; to: -90 360 0; dur: 3000; loop: true; easing: linear"></a-torus>
+          <a-text value="I" position="0 0 0.1" align="center" scale="0.16 0.16 0.16" color="#fff"></a-text>
+          <a-text value="Momentos" position="0 -0.17 0" align="center" scale="0.065 0.065 0.065" color="#fff"></a-text>
+          <a-text value="Historicos" position="0 -0.235 0" align="center" scale="0.065 0.065 0.065" color="#fff"></a-text>
+        </a-entity>
+
+        <a-entity id="orb-1" class="clickable chapter-orb" data-chapter="1"
+          position="0 0.22 0.45" visible="false" pulse-glow chapter-orb>
+          <a-sphere radius="0.095" color="#1b5e20" metalness="0.45" roughness="0.22" opacity="0.92"></a-sphere>
+          <a-torus radius="0.13" radius-tubular="0.008" rotation="-90 0 0" color="#ffd700" opacity="0.65"
+            animation="property: rotation; to: -90 360 0; dur: 3500; loop: true; easing: linear"></a-torus>
+          <a-text value="*" position="0 0 0.1" align="center" scale="0.2 0.2 0.2" color="#ffd700"></a-text>
+          <a-text value="Nuestros" position="0 -0.17 0" align="center" scale="0.065 0.065 0.065" color="#fff"></a-text>
+          <a-text value="Valores" position="0 -0.235 0" align="center" scale="0.065 0.065 0.065" color="#fff"></a-text>
+        </a-entity>
+
+        <a-entity id="orb-2" class="clickable chapter-orb" data-chapter="2"
+          position="0.48 0.22 0" visible="false" pulse-glow chapter-orb>
+          <a-sphere radius="0.095" color="#e65100" metalness="0.45" roughness="0.22" opacity="0.92"></a-sphere>
+          <a-torus radius="0.13" radius-tubular="0.008" rotation="-90 0 0" color="#ffd700" opacity="0.65"
+            animation="property: rotation; to: -90 360 0; dur: 4000; loop: true; easing: linear"></a-torus>
+          <a-text value=">" position="0 0 0.1" align="center" scale="0.18 0.18 0.18" color="#fff"></a-text>
+          <a-text value="Nuestro" position="0 -0.17 0" align="center" scale="0.065 0.065 0.065" color="#fff"></a-text>
+          <a-text value="Futuro" position="0 -0.235 0" align="center" scale="0.065 0.065 0.065" color="#fff"></a-text>
+        </a-entity>
+
+      </a-entity>
+
+    </a-entity>
+    <!-- /target-root -->
+
+  </a-scene>
+
+  <script src="js/experience.js"></script>
+  <script>
+    // Iniciar la experiencia automáticamente en demo mode
+    document.querySelector('a-scene').addEventListener('loaded', function () {
+      var targetRoot = document.getElementById('target-root');
+      if (targetRoot) {
+        setTimeout(function () {
+          targetRoot.emit('targetFound');
+        }, 800);
+      }
+    });
+  </script>
+</body>
+</html>
