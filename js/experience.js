@@ -106,10 +106,10 @@ const CHAPTERS = {
         desc: 'Cada colaborador es parte esencial de esta visión. Juntos escribimos el futuro de la salud cardiovascular en Colombia. Gracias por ser parte de esta historia.'
       }
     ],
-    cta: {
-      text: 'Ver agenda del evento →',
-      url: '#'  // Reemplaza con la URL real del evento
-    }
+    // cta: {
+    //   text: 'Ver agenda del evento →',
+    //   url: '#'  // Reemplaza con la URL real del evento
+    // }
   }
 
 };
